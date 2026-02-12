@@ -9,7 +9,14 @@ class LLMClassifier:
     (BLOOMZ, LLaMA-3, Mistral) used in baseline experiments.
 
     Models are treated as sequence classifiers rather than text generators.
+
+    Label convention:
+        0 -> Negative
+        1 -> Positive
+
+    This matches the MMS dataset encoding used for evaluation.
     """
+
 
     def __init__(self, model_name: str, num_labels: int = 2, device: Optional[str] = None):
 
