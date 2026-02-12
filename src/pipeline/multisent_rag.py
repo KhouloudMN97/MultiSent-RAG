@@ -1,3 +1,4 @@
+from typing import List
 import torch
 from transformers import (
     AutoTokenizer,
@@ -121,12 +122,17 @@ What is the sentiment of the text?
     # Inference
     # -----------------------------
 
-    def predict(self, text: str, mode: str = "fewshot") -> str:
-        """
-        mode:
-            - "fewshot"  -> 8 seen languages
-            - "zeroshot" -> 4 unseen languages
-        """
+    def predict(self, texts: List[str], mode: str = "fewshot") -> List[str]:
+    """
+    Predict sentiment labels for a list of texts.
+
+    Returns:
+        List[str]  -> raw model outputs (e.g. "Positive")
+    """
+
+    predictions = []
+
+    for text in texts:
 
         if mode == "fewshot":
             prompt = self.build_fewshot_prompt(text)
@@ -136,4 +142,6 @@ What is the sentiment of the text?
         output = self.generator(prompt)[0]["generated_text"].strip()
 
         # Return only first word (enforced by prompt)
-        return output.split()[0]
+        predictions.append(output.split()[0])
+
+    return predictions
