@@ -1,7 +1,6 @@
 # 🚀 MultiSent-RAG  
 ### Retrieval & Memory-Augmented Multilingual Sentiment Intelligence
 
-> Research implementation of **MultiSent-RAG**, submitted to *Information Processing & Management (IP&M)*.
 
 ---
 
@@ -14,9 +13,6 @@ This repository showcases a **full-stack Retrieval-Augmented Generation (RAG) sy
 - 🗄 Semantic memory caching (Annoy + angular distance)
 - 🌍 Cross-lingual generalization (12 languages, including zero-shot)
 - 📊 Reproducible evaluation pipeline
-
-This is not a notebook experiment.  
-It is a **modular, production-style RAG architecture** designed for multilingual AI systems.
 
 ---
 
@@ -63,7 +59,7 @@ Zero-shot languages are never indexed in the vector store — evaluation tests t
 - Massive Multilingual Sentiment (MMS)
 
 ### Unstructured
-- Wikipedia (emotion & sentiment queries per language)
+- Wikipedia (sentiment analysis knowledge per language)
 
 All sources are embedded using:
 
@@ -160,22 +156,8 @@ python src/scripts/run_rag_cache.py
 
 ---
 
-## 📊 Skills Demonstrated
 
-This repository demonstrates practical experience with:
-
-- Vector databases (Chroma)
-- Approximate nearest neighbor search (Annoy)
-- Multilingual embeddings
-- LLM quantization
-- Retrieval-Augmented Generation
-- Memory-aware inference
-- Cross-lingual evaluation
-- Modular AI system design
-
----
-
-## 🔬 Research Context
+## 🔬 Context
 
 Implementation of:
 
