@@ -1,7 +1,7 @@
 # MultiSent-RAG  
 A Retrieval and Memory-Augmented System for Multilingual Sentiment Processing
 
-Official implementation of the paper:
+Implementation of the paper:
 
 **MultiSent-RAG: A Retrieval and Memory-Augmented System for Multilingual Sentiment Processing**  
 Submitted to *Information Processing & Management (IP&M)*.
