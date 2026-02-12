@@ -6,7 +6,13 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 class EncoderClassifier:
     """
     Inference-only wrapper for encoder-based models
-    (mBERT, XLM-R).
+    (e.g., mBERT, XLM-R).
+
+    Label convention:
+        0 -> Negative
+        1 -> Positive
+
+    This matches the MMS dataset encoding used for evaluation.
     """
 
     def __init__(self, model_name: str, device: Optional[str] = None):
@@ -25,7 +31,10 @@ class EncoderClassifier:
         self.model.to(self.device)
         self.model.eval()
 
-    def predict(self, texts: List[str], batch_size: int = 32):
+    def predict(self, texts: List[str], batch_size: int = 32) -> List[int]:
+        """
+        Predict sentiment labels for a list of texts.
+        """
 
         all_outputs = []
 
@@ -48,6 +57,6 @@ class EncoderClassifier:
                 all_outputs.append(outputs.logits.cpu())
 
         logits = torch.cat(all_outputs, dim=0)
-        predictions = logits.argmax(dim=1).numpy()
+        predictions = logits.argmax(dim=1).tolist()
 
         return predictions

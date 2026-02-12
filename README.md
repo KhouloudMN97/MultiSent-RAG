@@ -106,12 +106,14 @@ This enables:
 
 ```
 src/
-├── baselines/        # Encoder & LLM classification models
-├── rag/              # Core RAG pipeline
-├── memory/           # Semantic cache implementation
-├── vectorstore/      # Chroma DB construction
-├── evaluation/       # Metrics & evaluation logic
-├── scripts/          # Experiment entry points
+├── baselines/
+├── core/
+├── data/
+├── evaluation/
+├── memory/
+├── rag/
+├── scripts/
+
 ```
 
 ---
