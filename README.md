@@ -20,73 +20,64 @@ MultiSent-RAG is a multilingual sentiment analysis framework that integrates:
 
 In this repository, LLMs are used in a **non-generative setting**, i.e., as sequence classification models rather than text generators.
 
-The current implementation includes the multilingual baseline evaluation pipeline.
-
 ---
 
 ## 📁 Project Structure
 
 ```
 src/
-  baselines/     # Encoder and LLM-based classification models
-  core/          # Data loading and evaluation logic
-  evaluation/    # Metrics computation
-  rag/           # Retrieval module (RAG)
-  memory/        # Semantic memory cache
-
-scripts/
-  run_baselines.py
+  baselines/         # Encoder and LLM-based classification models
+  core/              # Data loading and evaluation logic
+  data/              # Data loading utilities
+  evaluation/        # Metrics + label mapping
+  rag/               # MultiSent-RAG reader model
+  scripts/
+      build_wikipedia.py
+      run_baselines.py
+      run_rag.py
+  vectorstore/
+      build_vectorstore.py
 
 tests/
+README.md
+requirements.txt
 ```
 
 ---
 
-## 📊 Dataset
+## 📊 Datasets
 
-### Massive Multilingual Sentiment Corpus (MMS)
+### Structured Data
 
-We evaluate baselines on the **Massive Multilingual Sentiment (MMS)** dataset:
+We use:
 
-HuggingFace: https://huggingface.co/datasets/Brand24/mms
+- **Cardiff NLP Tweet Sentiment Multilingual**
+  - 8 languages: `en, fr, ar, es, de, pt, hi, it`
+  - Used as retrieval knowledge source
 
-The MMS corpus contains over 6 million sentiment-labeled instances across multiple languages.
-
----
-
-### 🌍 Language Selection
-
-Evaluation is conducted on the following 12 languages:
-
-- ar (Arabic)
-- en (English)
-- fr (French)
-- es (Spanish)
-- de (German)
-- hi (Hindi)
-- pt (Portuguese)
-- it (Italian)
-- bg (Bulgarian)
-- fa (Persian)
-- ja (Japanese)
-- zh (Chinese)
+- **Massive Multilingual Sentiment (MMS)**
+  - Train subset: 10k samples per language (8 languages → 80k total)
+  - Test subset: 1k samples per language
+  - Zero-shot languages: `bg, fa, ja, zh` (evaluation only)
 
 ---
 
-### ⚖ Sampling Strategy
+### Unstructured Data – Wikipedia
 
-For evaluation:
+For the same 8 retrieval languages:
 
-- 1,000 test instances per language
-- Binary labels only (negative and positive)
+Queries:
+- Positive emotions
+- Negative emotions
+- Sentiment expression
 
-Total benchmark size: 12,000 samples.
+Up to 100 documents per language are extracted and truncated to ~1000 characters.
+
+These documents are embedded and stored in a Chroma vector database.
 
 ---
 
 ## 🧠 Models Evaluated
-
-The following pretrained models are evaluated:
 
 - `bert-base-multilingual-cased`
 - `xlm-roberta-base`
@@ -94,78 +85,126 @@ The following pretrained models are evaluated:
 - `meta-llama/Meta-Llama-3-8B`
 - `mistralai/Mistral-7B-v0.1`
 
-LLM-based models are loaded using 4-bit quantization (nf4) for efficient inference, as described in the paper.
-
----
----
-
-## 🗄️ Vector Database Construction (Chroma)
-
-MultiSent-RAG relies on a persistent Chroma vector database that stores multilingual retrieval knowledge.
-
-The vector database combines:
-
-### 🔹 Structured Data (Retrieval Knowledge)
-
-- **Cardiff NLP Tweet Sentiment Multilingual**
-  - 8 languages: `en, fr, ar, es, de, pt, hi, it`
-  - Full corpus
-  - Used for retrieval only
-
-- **MMS (train subset)**
-  - Same 8 languages
-  - 10,000 samples per language (80,000 total)
-  - Used for retrieval only
-
-Zero-shot languages (`bg`, `fa`, `ja`, `zh`) are **excluded** from the vector database and used only for evaluation.
+LLM-based models are loaded using 4-bit quantization (nf4) for efficient inference.
 
 ---
 
-### 🔹 Unstructured Data (Wikipedia)
+# 🗄️ Vector Database Construction (Chroma)
 
-For the same 8 retrieval languages:
+MultiSent-RAG relies on a persistent Chroma vector database that combines:
 
-- Queries:
-  - Positive emotions
-  - Negative emotions
-  - Sentiment expression
-- Up to 100 documents per language
-- Each document truncated to ~1000 characters
+- Wikipedia (unstructured)
+- MMS (train subset)
+- Cardiff NLP dataset
 
----
-
-## 🧱 How to Build the Vector Database
-
-The vector database must be built before running retrieval-based models.
-
-
-### 📦 Build Retrieval Database (Chroma)
-
-The retrieval database must be created before running MultiSent-RAG.
-
-Run the following commands **in order**:
-
-## 1️⃣ Build Wikipedia knowledge base
-python src/scripts/build_wikipedia.py
-
-## 2️⃣ Build Chroma vector database
-python src/scripts/build_vectorstore.py
-
+Zero-shot languages are **excluded** from the vectorstore.
 
 ---
 
-## 🚀 Reproducibility
+# 🚀 Execution Order (Reproducibility Guide)
 
-Install dependencies:
+To fully reproduce the pipeline, run the following steps **in order**:
 
-```
+---
+
+### 1️⃣ Install Dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-Run baseline evaluation:
+---
+
+### 2️⃣ Build Wikipedia Knowledge Base
+
+```bash
+python src/scripts/build_wikipedia.py
+```
+
+This extracts multilingual Wikipedia documents and saves:
 
 ```
-python scripts/run_baselines.py
+data/wikipedia.csv
 ```
 
-Model selection can be modified inside `scripts/run_baselines.py`.
+---
+
+### 3️⃣ Build Chroma Vector Database
+
+```bash
+python src/vectorstore/build_vectorstore.py
+```
+
+This:
+
+- Loads Wikipedia
+- Loads MMS (train subset)
+- Loads Cardiff dataset
+- Splits documents into chunks (768 tokens)
+- Embeds using `paraphrase-multilingual-mpnet-base-v2`
+- Saves persistent Chroma database
+
+---
+
+### 4️⃣ Run Baseline Models
+
+```bash
+python src/scripts/run_baselines.py
+```
+
+This evaluates:
+
+- mBERT
+- XLM-R
+- Quantized LLM classifiers
+
+---
+
+### 5️⃣ Run MultiSent-RAG
+
+```bash
+python src/scripts/run_rag.py
+```
+
+This performs:
+
+- Top-k retrieval (k=7) from Chroma
+- Context injection into prompt
+- Few-shot evaluation on 8 seen languages
+- Zero-shot evaluation on 4 unseen languages
+- Sentiment prediction
+- Metric computation (Accuracy, Precision, Recall, F1)
+
+Results are saved per language.
+
+---
+
+## 🔬 MultiSent-RAG Design
+
+For each input text:
+
+1. Retrieve top-k semantically similar documents
+2. Inject retrieved context into the prompt
+3. Use instruction-tuned LLM (Mistral or LLaMA-3)
+4. Generate one-word sentiment prediction
+5. Map to numeric label
+6. Compute evaluation metrics
+
+---
+
+## 📌 Notes
+
+- LLMs are used in a generative inference setup but constrained to single-word classification.
+- Retrieval is performed using multilingual MPNet embeddings.
+- All code is modular and organized for reproducibility and clarity.
+- Memory-augmented variant is implemented separately.
+
+---
+
+## 📎 Citation
+
+If you use this repository, please cite:
+
+*MultiSent-RAG: A Retrieval and Memory-Augmented System for Multilingual Sentiment Processing*  
+Information Processing & Management (Under Review)
+
