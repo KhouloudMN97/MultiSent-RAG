@@ -145,10 +145,10 @@ The retrieval database must be created before running MultiSent-RAG.
 
 Run the following commands **in order**:
 
-# 1️⃣ Build Wikipedia knowledge base
+## 1️⃣ Build Wikipedia knowledge base
 python src/scripts/build_wikipedia.py
 
-# 2️⃣ Build Chroma vector database
+## 2️⃣ Build Chroma vector database
 python src/scripts/build_vectorstore.py
 
 
