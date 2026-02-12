@@ -13,11 +13,14 @@ Submitted to *Information Processing & Management (IP&M)*.
 MultiSent-RAG is a multilingual sentiment analysis framework that integrates:
 
 - Encoder-based multilingual baselines (mBERT, XLM-R)
+- Decoder-based LLM baselines used in a non-generative classification setting (BLOOMZ, LLaMA-3, Mistral)
 - Retrieval-Augmented Generation (RAG)
 - Semantic memory caching
 - Evaluation across 12 languages
 
-This repository currently includes the encoder baseline implementation and evaluation pipeline.
+In this repository, LLMs are used in a **non-generative setting**, i.e., as sequence classification models rather than text generators.
+
+The current implementation includes the multilingual baseline evaluation pipeline.
 
 ---
 
@@ -25,7 +28,7 @@ This repository currently includes the encoder baseline implementation and evalu
 
 ```
 src/
-  baselines/     # Encoder-based multilingual models
+  baselines/     # Encoder and LLM-based classification models
   core/          # Data loading and evaluation logic
   evaluation/    # Metrics computation
   rag/           # Retrieval module (RAG)
@@ -43,7 +46,7 @@ tests/
 
 ### Massive Multilingual Sentiment Corpus (MMS)
 
-We evaluate encoder-based baselines on the **Massive Multilingual Sentiment (MMS)** dataset:
+We evaluate baselines on the **Massive Multilingual Sentiment (MMS)** dataset:
 
 HuggingFace: https://huggingface.co/datasets/Brand24/mms
 
@@ -53,7 +56,7 @@ The MMS corpus contains over 6 million sentiment-labeled instances across multip
 
 ### 🌍 Language Selection
 
-We evaluate on the following 12 languages:
+Evaluation is conducted on the following 12 languages:
 
 - ar (Arabic)
 - en (English)
@@ -81,6 +84,20 @@ Total benchmark size: 12,000 samples.
 
 ---
 
+## 🧠 Models Evaluated
+
+The following pretrained models are evaluated:
+
+- `bert-base-multilingual-cased`
+- `xlm-roberta-base`
+- `bigscience/bloomz-7b1`
+- `meta-llama/Meta-Llama-3-8B`
+- `mistralai/Mistral-7B-v0.1`
+
+LLM-based models are loaded using 4-bit quantization (nf4) for efficient inference, as described in the paper.
+
+---
+
 ## 🚀 Reproducibility
 
 Install dependencies:
@@ -89,24 +106,10 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Run encoder baselines:
+Run baseline evaluation:
 
 ```
 python scripts/run_baselines.py
 ```
 
----
-
-## 🧠 Models
-
-- bert-base-multilingual-cased  
-- xlm-roberta-base  
-
 Model selection can be modified inside `scripts/run_baselines.py`.
-
----
-
-## 📌 Notes
-
-- The RAG and memory modules are structured for integration within the MultiSent-RAG framework.
-- For full experimental details, please refer to the paper.
