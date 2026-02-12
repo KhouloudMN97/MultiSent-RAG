@@ -8,11 +8,11 @@
 
 This repository showcases a **full-stack Retrieval-Augmented Generation (RAG) system for training-free multilingual NLP**, combining:
 
-- 🔎 Dense multilingual retrieval (Chroma + MPNet embeddings)
-- 🧾 LLM inference with quantized models (Mistral, LLaMA-3, BLOOMZ)
-- 🗄 Semantic memory caching (Annoy + angular distance)
-- 🌍 Cross-lingual generalization (12 languages, including zero-shot)
-- 📊 Reproducible evaluation pipeline
+- 🔎 Vector Store + Semantic Search (Google ChromaDB + multilingual MPNet embeddings)
+- 🧠 Retrieval-Augmented Generation (RAG) 
+- 🗄 Memory-Augmented Inference via Semantic Cache (Spotify Annoy, ANN search)
+- 🌍 Cross-Lingual & Zero-Shot Generalization (over 12 languages)
+
 
 ---
 
