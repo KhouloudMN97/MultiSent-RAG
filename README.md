@@ -1,24 +1,108 @@
-# MultiSent-RAG  
-A Retrieval and Memory-Augmented System for Multilingual Sentiment Processing
+# 🚀 MultiSent-RAG  
+### Retrieval & Memory-Augmented Multilingual Sentiment Intelligence
 
-Implementation of the paper:
-
-**MultiSent-RAG: A Retrieval and Memory-Augmented System for Multilingual Sentiment Processing**  
-Submitted to *Information Processing & Management (IP&M)*.
+> Research implementation of **MultiSent-RAG**, submitted to *Information Processing & Management (IP&M)*.
 
 ---
 
-## 🔍 Overview
+## 🧠 What This Project Demonstrates
 
-MultiSent-RAG is a multilingual sentiment analysis framework that integrates:
+This repository showcases a **full-stack Retrieval-Augmented Generation (RAG) system for multilingual NLP**, combining:
 
-- Encoder-based multilingual baselines (mBERT, XLM-R)
-- Decoder-based LLM baselines used in a non-generative classification setting (BLOOMZ, LLaMA-3, Mistral)
-- Retrieval-Augmented Generation (RAG)
-- Semantic memory caching
-- Evaluation across 12 languages
+- 🔎 Dense multilingual retrieval (Chroma + MPNet embeddings)
+- 🧾 LLM inference with quantized models (Mistral, LLaMA-3, BLOOMZ)
+- 🗄 Semantic memory caching (Annoy + angular distance)
+- 🌍 Cross-lingual generalization (12 languages, including zero-shot)
+- 📊 Reproducible evaluation pipeline
 
-In this repository, LLMs are used in a **non-generative setting**, i.e., as sequence classification models rather than text generators.
+This is not a notebook experiment.  
+It is a **modular, production-style RAG architecture** designed for multilingual AI systems.
+
+---
+
+## 🏗 System Architecture
+
+MultiSent-RAG follows a layered AI system design:
+
+```
+Input Text
+    ↓
+Embedding (MPNet)
+    ↓
+Chroma Vector Retrieval (top-k)
+    ↓
+LLM Inference (4-bit quantized)
+    ↓
+Label Mapping
+```
+
+With optional semantic memory:
+
+```
+Semantic Cache (Annoy index)
+→ If high similarity → reuse prediction
+→ Otherwise → full RAG pipeline
+```
+
+---
+
+## 🌍 Languages Covered
+
+| Training Languages | Zero-Shot Evaluation |
+|-------------------|---------------------|
+| en, fr, ar, es, de, pt, hi, it | bg, fa, ja, zh |
+
+Zero-shot languages are never indexed in the vector store — evaluation tests true cross-lingual transfer.
+
+---
+
+## 📦 Knowledge Sources
+
+### Structured
+- Cardiff NLP Multilingual Tweets
+- Massive Multilingual Sentiment (MMS)
+
+### Unstructured
+- Wikipedia (emotion & sentiment queries per language)
+
+All sources are embedded using:
+
+```
+paraphrase-multilingual-mpnet-base-v2
+```
+
+and stored in a persistent **Chroma vector database**.
+
+---
+
+## 🧠 Models Used
+
+**Encoders**
+- mBERT
+- XLM-R
+
+**LLMs (4-bit quantized)**
+- BLOOMZ-7B
+- LLaMA-3-8B
+- Mistral-7B
+
+LLMs operate in a generative setup constrained to single-word sentiment outputs.
+
+---
+
+## 🗄 Semantic Cache (Memory Layer)
+
+The semantic cache:
+
+- Stores embeddings + predictions
+- Uses Annoy with angular distance
+- Applies similarity threshold (default: 0.9)
+- Skips retrieval + LLM inference when similarity is high
+
+This enables:
+- Stability analysis
+- Latency vs accuracy trade-offs
+- Memory-aware LLM orchestration
 
 ---
 
@@ -26,139 +110,41 @@ In this repository, LLMs are used in a **non-generative setting**, i.e., as sequ
 
 ```
 src/
-  baselines/         # Encoder and LLM-based classification models
-  core/              # Data loading and evaluation logic
-  data/              # Data loading utilities
-  evaluation/        # Metrics + label mapping
-  rag/               # MultiSent-RAG reader model
-  scripts/
-      build_wikipedia.py
-      run_baselines.py
-      run_rag.py
-  vectorstore/
-      build_vectorstore.py
-
-tests/
-README.md
-requirements.txt
+├── baselines/        # Encoder & LLM classification models
+├── rag/              # Core RAG pipeline
+├── memory/           # Semantic cache implementation
+├── vectorstore/      # Chroma DB construction
+├── evaluation/       # Metrics & evaluation logic
+├── scripts/          # Experiment entry points
 ```
 
 ---
 
-## 📊 Datasets
+## 🚀 How to Run
 
-### Structured Data
-
-We use:
-
-- **Cardiff NLP Tweet Sentiment Multilingual**
-  - 8 languages: `en, fr, ar, es, de, pt, hi, it`
-  - Used as retrieval knowledge source
-
-- **Massive Multilingual Sentiment (MMS)**
-  - Train subset: 10k samples per language (8 languages → 80k total)
-  - Test subset: 1k samples per language
-  - Zero-shot languages: `bg, fa, ja, zh` (evaluation only)
-
----
-
-### Unstructured Data – Wikipedia
-
-For the same 8 retrieval languages:
-
-Queries:
-- Positive emotions
-- Negative emotions
-- Sentiment expression
-
-Up to 100 documents per language are extracted and truncated to ~1000 characters.
-
-These documents are embedded and stored in a Chroma vector database.
-
----
-
-## 🧠 Models Evaluated
-
-- `bert-base-multilingual-cased`
-- `xlm-roberta-base`
-- `bigscience/bloomz-7b1`
-- `meta-llama/Meta-Llama-3-8B`
-- `mistralai/Mistral-7B-v0.1`
-
-LLM-based models are loaded using 4-bit quantization (nf4) for efficient inference.
-
----
-
-# 🗄️ Vector Database Construction (Chroma)
-
-MultiSent-RAG relies on a persistent Chroma vector database that combines:
-
-- Wikipedia (unstructured)
-- MMS (train subset)
-- Cardiff NLP dataset
-
-Zero-shot languages are **excluded** from the vectorstore.
-
----
-
-# 🚀 Execution Order (Reproducibility Guide)
-
-To fully reproduce the pipeline, run the following steps **in order**:
-
----
-
-### 1️⃣ Install Dependencies
+### 1️⃣ Install
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
-
-### 2️⃣ Build Wikipedia Knowledge Base
+### 2️⃣ Build Wikipedia Knowledge
 
 ```bash
 python src/scripts/build_wikipedia.py
 ```
 
-This extracts multilingual Wikipedia documents and saves:
-
-```
-data/wikipedia.csv
-```
-
----
-
-### 3️⃣ Build Chroma Vector Database
+### 3️⃣ Build Vector Database
 
 ```bash
 python src/vectorstore/build_vectorstore.py
 ```
 
-This:
-
-- Loads Wikipedia
-- Loads MMS (train subset)
-- Loads Cardiff dataset
-- Splits documents into chunks (768 tokens)
-- Embeds using `paraphrase-multilingual-mpnet-base-v2`
-- Saves persistent Chroma database
-
----
-
-### 4️⃣ Run Baseline Models
+### 4️⃣ Run Baselines
 
 ```bash
 python src/scripts/run_baselines.py
 ```
-
-This evaluates:
-
-- mBERT
-- XLM-R
-- Quantized LLM classifiers
-
----
 
 ### 5️⃣ Run MultiSent-RAG
 
@@ -166,45 +152,32 @@ This evaluates:
 python src/scripts/run_rag.py
 ```
 
-This performs:
+### 6️⃣ Run MultiSent-RAG + Memory
 
-- Top-k retrieval (k=7) from Chroma
-- Context injection into prompt
-- Few-shot evaluation on 8 seen languages
-- Zero-shot evaluation on 4 unseen languages
-- Sentiment prediction
-- Metric computation (Accuracy, Precision, Recall, F1)
-
-Results are saved per language.
+```bash
+python src/scripts/run_rag_cache.py
+```
 
 ---
 
-## 🔬 MultiSent-RAG Design
+## 📊 Skills Demonstrated
 
-For each input text:
+This repository demonstrates practical experience with:
 
-1. Retrieve top-k semantically similar documents
-2. Inject retrieved context into the prompt
-3. Use instruction-tuned LLM (Mistral or LLaMA-3)
-4. Generate one-word sentiment prediction
-5. Map to numeric label
-6. Compute evaluation metrics
-
----
-
-## 📌 Notes
-
-- LLMs are used in a generative inference setup but constrained to single-word classification.
-- Retrieval is performed using multilingual MPNet embeddings.
-- All code is modular and organized for reproducibility and clarity.
-- Memory-augmented variant is implemented separately.
+- Vector databases (Chroma)
+- Approximate nearest neighbor search (Annoy)
+- Multilingual embeddings
+- LLM quantization
+- Retrieval-Augmented Generation
+- Memory-aware inference
+- Cross-lingual evaluation
+- Modular AI system design
 
 ---
 
-## 📎 Citation
+## 🔬 Research Context
 
-If you use this repository, please cite:
+Implementation of:
 
-*MultiSent-RAG: A Retrieval and Memory-Augmented System for Multilingual Sentiment Processing*  
-Information Processing & Management (Under Review)
-
+**MultiSent-RAG: A Retrieval and Memory-Augmented System for Multilingual Sentiment Processing**  
+Submitted to *Information Processing & Management (IP&M)*.
