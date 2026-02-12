@@ -6,7 +6,7 @@
 
 ## 🧠 What This Project Demonstrates
 
-This repository showcases a **full-stack Retrieval-Augmented Generation (RAG) system for multilingual NLP**, combining:
+This repository showcases a **full-stack Retrieval-Augmented Generation (RAG) system for training-free multilingual NLP**, combining:
 
 - 🔎 Dense multilingual retrieval (Chroma + MPNet embeddings)
 - 🧾 LLM inference with quantized models (Mistral, LLaMA-3, BLOOMZ)
@@ -71,18 +71,33 @@ and stored in a persistent **Chroma vector database**.
 
 ---
 
-## 🧠 Models Used
+## 🧠 Models
 
-**Encoders**
-- mBERT
-- XLM-R
+### Encoder Baselines 
+- `bert-base-multilingual-cased`
+- `xlm-roberta-base`
 
-**LLMs (4-bit quantized)**
-- BLOOMZ-7B
-- LLaMA-3-8B
-- Mistral-7B
+Used as sequence classification models without any fine-tuning.
 
-LLMs operate in a generative setup constrained to single-word sentiment outputs.
+---
+
+### LLM Baselines (4-bit Quantized)
+- `bigscience/bloomz-7b1`
+- `meta-llama/Meta-Llama-3-8B`
+- `mistralai/Mistral-7B`
+
+LLMs are treated as sequence classifiers.
+
+---
+
+### MultiSent-RAG & MultiSent-RAG-Cache
+
+RAG experiments use instruction-tuned models only:
+
+- `meta-llama/Meta-Llama-3-8B-Instruct`
+- `mistralai/Mistral-7B-Instruct`
+
+These models operate in a generative inference setup (prompt-based), without supervised fine-tuning.
 
 ---
 
