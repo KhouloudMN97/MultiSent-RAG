@@ -97,6 +97,62 @@ The following pretrained models are evaluated:
 LLM-based models are loaded using 4-bit quantization (nf4) for efficient inference, as described in the paper.
 
 ---
+---
+
+## 🗄️ Vector Database Construction (Chroma)
+
+MultiSent-RAG relies on a persistent Chroma vector database that stores multilingual retrieval knowledge.
+
+The vector database combines:
+
+### 🔹 Structured Data (Retrieval Knowledge)
+
+- **Cardiff NLP Tweet Sentiment Multilingual**
+  - 8 languages: `en, fr, ar, es, de, pt, hi, it`
+  - Full corpus
+  - Used for retrieval only
+
+- **MMS (train subset)**
+  - Same 8 languages
+  - 10,000 samples per language (80,000 total)
+  - Used for retrieval only
+
+Zero-shot languages (`bg`, `fa`, `ja`, `zh`) are **excluded** from the vector database and used only for evaluation.
+
+---
+
+### 🔹 Unstructured Data (Wikipedia)
+
+For the same 8 retrieval languages:
+
+- Queries:
+  - Positive emotions
+  - Negative emotions
+  - Sentiment expression
+- Up to 100 documents per language
+- Each document truncated to ~1000 characters
+
+---
+
+## 🧱 How to Build the Vector Database
+
+The vector database must be built before running retrieval-based models.
+
+
+### 📦 Build Retrieval Database (Chroma)
+
+The retrieval database must be created before running MultiSent-RAG.
+
+Run the following commands **in order**:
+
+# 1️⃣ Build Wikipedia knowledge base
+python src/scripts/build_wikipedia.py
+
+# 2️⃣ Build Chroma vector database
+python src/scripts/build_vectorstore.py
+
+
+---
 
 ## 🚀 Reproducibility
 
