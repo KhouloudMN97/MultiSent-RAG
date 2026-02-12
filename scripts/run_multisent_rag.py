@@ -3,9 +3,9 @@ from tqdm import tqdm
 from langchain.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 
-from src.rag.multisent_rag import MultiSentRAG
-from src.evaluation.utils import map_answer_to_label
-from src.evaluation.evaluate import compute_metrics
+from src.pipeline.multisent_rag import MultiSentRAG
+from src.evaluation.rag_evaluator import map_answer_to_label
+from src.evaluation.metrics import compute_metrics
 
 
 VECTORSTORE_PATH = "data/chroma_vectorstore"
@@ -20,7 +20,6 @@ BASE_TEST_PATH = "data/test_sets"
 
 def main():
 
-    # Load vector database
     embedding_model = HuggingFaceEmbeddings(
         model_name=EMBEDDING_MODEL,
         model_kwargs={"device": "cuda"}
@@ -33,7 +32,6 @@ def main():
 
     model = MultiSentRAG(
         model_name="mistralai/Mistral-7B-Instruct-v0.1"
-        # or model_name=""meta-llama/Meta-Llama-3-8B-Instruct""
     )
 
     for lang in ALL_LANGUAGES:
@@ -54,13 +52,11 @@ def main():
 
         for text in tqdm(df["text"], desc=lang):
 
-            # 🔍 Retrieve top-k documents
             retrieved_docs = vectorstore.similarity_search(
                 query=text,
                 k=7
             )
 
-            # Format retrieved documents exactly like your notebook
             retrieved_docs_text = []
             for i, doc in enumerate(retrieved_docs):
                 meta = doc.metadata
@@ -79,13 +75,12 @@ def main():
 
             full_input = f"{context}\n\nText: {text}"
 
-            answer = model.predict(full_input, mode=mode)
+            answer = model.predict([full_input], mode=mode)[0]
             predictions.append(answer)
 
         df["answer"] = predictions
         df["predicted_label"] = df["answer"].apply(map_answer_to_label)
 
-        # Compute metrics
         metrics = compute_metrics(
             y_true=df["label"],
             y_pred=df["predicted_label"]

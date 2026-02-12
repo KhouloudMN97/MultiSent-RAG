@@ -3,9 +3,10 @@ from tqdm import tqdm
 from langchain.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 
-from src.rag.multisent_rag import MultiSentRAG
+from src.pipeline.multisent_rag import MultiSentRAG
 from src.memory.semantic_cache import SemanticCache
-from src.evaluation.metrics import evaluate_predictions
+from src.evaluation.rag_evaluator import map_answer_to_label
+from src.evaluation.metrics import compute_metrics
 
 
 VECTOR_PATH = "data/chroma_db"
@@ -27,13 +28,12 @@ def main():
     # 🔹 Load Reader Model
     reader = MultiSentRAG(
         model_name="mistralai/Mistral-7B-Instruct-v0.1"
-        # or model_name=""meta-llama/Meta-Llama-3-8B-Instruct""
     )
 
     # 🔹 Initialize Semantic Cache
     cache = SemanticCache(
         json_file="cache_file.json",
-        threshold=0.7,
+        threshold=0.9,
         knowledge_vector_database=vector_db,
         rag_prompt_template=reader.build_fewshot_prompt("{question}"),
         reader_llm=reader.generator,
@@ -57,7 +57,14 @@ def main():
 
     results_df = pd.DataFrame(results)
 
-    metrics = evaluate_predictions(results_df)
+    # 🔹 Map responses to numeric labels
+    results_df["predicted_label"] = results_df["response"].apply(map_answer_to_label)
+
+    # 🔹 Compute metrics
+    metrics = compute_metrics(
+        y_true=results_df["label"],
+        y_pred=results_df["predicted_label"]
+    )
 
     print("\nEvaluation Results:")
     for k, v in metrics.items():
