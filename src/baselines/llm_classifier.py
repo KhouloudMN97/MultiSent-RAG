@@ -1,21 +1,25 @@
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, BitsAndBytesConfig
-from peft import PeftModel
 
 
 class LLMClassifier:
     """
-    Quantized + LoRA-based classifier for:
+    Here we use LLMs in a non-generative setting, treating them as
+    sequence classification models rather than text generators.
+
+    Quantized inference-only classifier for:
     - BLOOMZ
     - LLaMA-3
     - Mistral
+
+    Used for baseline results reported in the paper.
     """
 
-    def __init__(self, model_name: str, adapter_path: str = None, num_labels: int = 2):
+    def __init__(self, model_name: str, num_labels: int = 2):
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        # 4-bit quantization config (as in paper)
+        # 4-bit quantization (as reported in the paper)
         quant_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_quant_type="nf4",
@@ -25,22 +29,16 @@ class LLMClassifier:
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-        base_model = AutoModelForSequenceClassification.from_pretrained(
+        self.model = AutoModelForSequenceClassification.from_pretrained(
             model_name,
             quantization_config=quant_config,
             num_labels=num_labels
         )
 
-        # Fix pad token (important for LLaMA/Mistral)
+        # Fix pad token (important for LLaMA/Mistral/BLOOM)
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
-            base_model.config.pad_token_id = self.tokenizer.eos_token_id
-
-        # Load LoRA adapters if provided
-        if adapter_path is not None:
-            self.model = PeftModel.from_pretrained(base_model, adapter_path)
-        else:
-            self.model = base_model
+            self.model.config.pad_token_id = self.tokenizer.eos_token_id
 
         self.model.to(self.device)
         self.model.eval()
