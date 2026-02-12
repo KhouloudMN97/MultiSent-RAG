@@ -1,5 +1,5 @@
 """
-Run encoder baselines (mBERT / XLM-R) on MMS test set.
+Entry point for running encoder baselines (mBERT / XLM-R) on MMS test set.
 """
 
 from src.baselines.encoder import EncoderClassifier
@@ -9,7 +9,7 @@ from src.core.evaluator import evaluate_multilingual
 
 def main():
 
-    test_path = "data/mms_testset.csv"
+    test_path = "data/mms_testset.csv" # you dataset preprocessed and saved
 
     df_test = load_mms_test_data(test_path)
 
