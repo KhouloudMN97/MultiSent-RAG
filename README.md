@@ -1,5 +1,5 @@
 # 🚀 MultiSent-RAG  
-### Retrieval & Memory-Augmented Multilingual Sentiment Intelligence
+### Retrieval & Memory-Augmented Multilingual Sentiment Analysis
 
 
 ---
@@ -8,11 +8,15 @@
 
 This repository showcases a **full-stack Retrieval-Augmented Generation (RAG) system for training-free multilingual NLP**, combining:
 
-- 🔎 Vector Store + Semantic Search (Google ChromaDB + multilingual MPNet embeddings)
+- 🔎 Vector Store + Semantic Search (ChromaDB + multilingual MPNet embeddings)
 - 🧠 Retrieval-Augmented Generation (RAG) 
-- 🗄 Memory-Augmented Inference via Semantic Cache (Spotify Annoy, ANN search)
+- 🗄 Memory-Augmented Inference via Semantic Cache (Annoy, ANN search)
 - 🌍 Cross-Lingual & Zero-Shot Generalization (over 12 languages)
 
+
+> ### 🚀 Beyond Sentiment Analysis
+> Built as a scalable multilingual RAG + Memory backbone, this project is not limited to a single prediction task.
+> Its retrieval and semantic memory layers enable extension to use cases such as hate speech detection, product review analytics, document classification, etc, especially in cross-lingual reasoning scenarios.
 
 ---
 
