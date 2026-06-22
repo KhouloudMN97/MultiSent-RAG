@@ -1,10 +1,6 @@
 # MultiSent-RAG
 
-Multilingual sentiment analysis using Retrieval-Augmented Generation (RAG) and semantic cache memory.
-
-📄 **Paper:** [MultiSent-RAG: A Retrieval and Memory-Augmented System for Multilingual Sentiment Processing](https://doi.org/10.1016/j.ipm.2026.104990)  
-*Information Processing & Management, Elsevier, 2026*  
-Khouloud Mnassri, Reza Farahbakhsh, Noel Crespi
+Training-free multilingual sentiment analysis using Retrieval-Augmented Generation and semantic cache memory.
 
 ---
 
@@ -42,6 +38,7 @@ It comes in two variants:
 ---
 
 ## Project Structure
+```
 MultiSent-RAG/
 
 ├── scripts/
@@ -95,7 +92,7 @@ MultiSent-RAG/
 ├── requirements.txt
 
 └── README.md
-
+```
 ---
 
 ## Installation
