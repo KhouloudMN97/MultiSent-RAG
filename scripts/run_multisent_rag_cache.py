@@ -1,6 +1,6 @@
 import pandas as pd
 from tqdm import tqdm
-from langchain.vectorstores import Chroma
+from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 
 from src.pipeline.multisent_rag import MultiSentRAG
@@ -10,7 +10,7 @@ from src.evaluation.metrics import compute_metrics
 
 
 VECTOR_PATH = "data/chroma_db"
-TEST_PATH = "data/test_sets/test_set_en.csv"
+TEST_PATH = "data/test_sets/test_set_en.csv" # Example run on English test set. Change TEST_PATH to run on other languages (e.g., test_set_fr.csv, test_set_ar.csv, etc.)
 
 
 def main():

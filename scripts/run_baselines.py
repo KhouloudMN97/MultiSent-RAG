@@ -13,7 +13,7 @@ def main():
     df_test = load_mms_test_data(test_path)
     language_dfs = split_by_language(df_test)
 
-    # Choose model name exactly as in paper
+    # Choose model name as in paper (from these models), or any other model
     model_name = "bert-base-multilingual-cased"
     # model_name = "xlm-roberta-base"
     # model_name = "bigscience/bloomz-7b1"
