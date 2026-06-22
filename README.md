@@ -1,166 +1,96 @@
-# MultiSent-RAG: A Retrieval and Memory-Augmented System for Multilingual Sentiment Processing
+# MultiSent-RAG
 
-Official implementation of:
+Multilingual sentiment analysis using Retrieval-Augmented Generation (RAG) and semantic cache memory.
 
-**MultiSent-RAG: A Retrieval and Memory-Augmented System for Multilingual Sentiment Processing**  
-Khouloud Mnassri, Reza Farahbakhsh, Noel Crespi  
-*Information Processing & Management* — Accepted, 2026  
-📄 DOI: [10.1016/j.ipm.2026.104990](https://doi.org/10.1016/j.ipm.2026.104990)
-
----
-
-## Overview
-
-Multilingual sentiment analysis remains challenging due to limited labeled data and strong cross-lingual variation. We introduce:
-
-- **MultiSent-RAG**: a training-free retrieval-augmented framework that integrates structured sentiment corpora with unstructured multilingual evidence
-- **MultiSent-RAG-Cache**: extends MultiSent-RAG with a semantic memory module that reuses prior label inferences based on embedding similarity
-
-Our study uses 80,000 labeled instances across 12 languages, including low-resource and zero-shot settings. Retrieval augmentation yields F1 gains of up to +0.65 points, with relative gains exceeding 70–110% over strong LLM baselines.
+📄 **Paper:** [MultiSent-RAG: A Retrieval and Memory-Augmented System for Multilingual Sentiment Processing](https://doi.org/10.1016/j.ipm.2026.104990)  
+*Information Processing & Management, Elsevier, 2026*  
+Khouloud Mnassri, Reza Farahbakhsh, Noel Crespi
 
 ---
 
-## System Architecture
+## What it does
+
+MultiSent-RAG is a **training-free** sentiment classification system that works across 12 languages. Instead of fine-tuning, it retrieves relevant multilingual examples at inference time and feeds them to an LLM.
+
+It comes in two variants:
+
+- **MultiSent-RAG** — retrieves top-k documents from a Chroma vector store, builds a prompt, and runs inference with a quantized LLM
+- **MultiSent-RAG-Cache** — adds a semantic cache layer (Annoy index) that reuses previous predictions when a new input is semantically similar, skipping retrieval and LLM inference entirely
 
 ![MultiSent-RAG Architecture](assets/figure_1.jpg)
 
-MultiSent-RAG follows a three-stage pipeline:
-Input Text
-
-↓
-
-Embedding (paraphrase-multilingual-mpnet-base-v2)
-
-↓
-
-Chroma Vector Retrieval (top-k = 7)
-
-↓
-
-LLM Inference (4-bit quantized, prompt-based)
-
-↓
-
-Label Mapping → Final Sentiment Prediction
-
-
-With optional semantic cache memory (MultiSent-RAG-Cache):
-
 ![MultiSent-RAG-Cache Workflow](assets/figure_2.jpg)
-Semantic Cache (Annoy index, angular distance)
-
-→ Cache hit (distance ≤ threshold) → return cached prediction
-
-→ Cache miss → full RAG pipeline → store new prediction in cache
 
 ---
 
-## Languages Covered
+## Languages
 
-| Seen Languages (Few-Shot) | Unseen Languages (Zero-Shot) |
-|--------------------------|------------------------------|
+| Seen (Few-Shot) | Unseen (Zero-Shot) |
+|----------------|-------------------|
 | en, fr, ar, es, de, pt, hi, it | bg, fa, ja, zh |
 
-Zero-shot languages are never indexed in the vector store — evaluation tests true cross-lingual transfer.
-
 ---
 
-## Models
+## Stack
 
-### Encoder Baselines
-- `bert-base-multilingual-cased`
-- `xlm-roberta-base`
-
-### LLM Baselines (4-bit Quantized)
-- `bigscience/bloomz-7b1`
-- `meta-llama/Meta-Llama-3-8B`
-- `mistralai/Mistral-7B-v0.1`
-
-### MultiSent-RAG & MultiSent-RAG-Cache
-- `meta-llama/Meta-Llama-3-8B-Instruct`
-- `mistralai/Mistral-7B-Instruct-v0.1`
-
----
-
-## Knowledge Sources
-
-**Structured:**
-- Cardiff NLP Tweet Sentiment Multilingual (8 languages)
-- Massive Multilingual Sentiment — MMS (10k samples/language, 80k total)
-
-**Unstructured:**
-- Wikipedia articles in 8 languages (up to 100 documents/language)
-
-All sources embedded with `paraphrase-multilingual-mpnet-base-v2` and stored in a persistent Chroma vector database.
-
----
-
-## Results (Weighted F1)
-
-| Model | Avg F1 (12 Languages) |
-|-------|----------------------|
-| mBERT | 0.459 |
-| LLaMA-3 (baseline) | 0.516 |
-| Mistral (baseline) | 0.472 |
-| MultiSent-RAG (LLaMA-3) | 0.783 |
-| MultiSent-RAG (Mistral) | 0.768 |
-| MultiSent-RAG-Cache (LLaMA-3) | 0.760 |
-| MultiSent-RAG-Cache (Mistral) | 0.748 |
+- **Embeddings:** `paraphrase-multilingual-mpnet-base-v2`
+- **Vector store:** ChromaDB
+- **LLMs:** Mistral-7B-Instruct, LLaMA-3-8B-Instruct (4-bit quantized)
+- **Cache:** Annoy (angular distance, threshold = 0.9)
+- **Baselines:** mBERT, XLM-R, BLOOMZ, LLaMA-3, Mistral
 
 ---
 
 ## Project Structure
 MultiSent-RAG/
 
-├── assets/
-
-│   ├── figure_1.jpg               # MultiSent-RAG architecture
-
-│   └── figure_2.jpg               # MultiSent-RAG-Cache workflow
-
 ├── scripts/
 
-│   ├── build_wikipedia.py         # Build Wikipedia knowledge base
+│   ├── build_wikipedia.py          # Fetch and store Wikipedia knowledge
 
-│   ├── build_vectorstore.py       # Build Chroma vector database
+│   ├── build_vectorstore.py        # Build Chroma vector database
 
-│   ├── run_baselines.py           # Run encoder and LLM baselines
+│   ├── run_baselines.py            # Run encoder and LLM baselines
 
-│   ├── run_multisent_rag.py       # Run MultiSent-RAG (all 12 languages)
+│   ├── run_multisent_rag.py        # Run MultiSent-RAG across all languages
 
-│   └── run_multisent_rag_cache.py # Run MultiSent-RAG with semantic cache
+│   └── run_multisent_rag_cache.py  # Run MultiSent-RAG with semantic cache
 
 ├── src/
 
 │   ├── baselines/
 
-│   │   ├── encoder.py             # Encoder-based classifier
+│   │   ├── encoder.py              # Encoder classifier (mBERT, XLM-R)
 
-│   │   └── llm_classifier.py      # LLM-based classifier
+│   │   └── llm_classifier.py       # LLM classifier (BLOOMZ, LLaMA, Mistral)
 
 │   ├── data/
 
-│   │   ├── data_loader.py         # Load and split MMS test data
+│   │   ├── data_loader.py          # Load and split MMS test data
 
-│   │   └── wikipedia_loader.py    # Load Wikipedia knowledge
+│   │   └── wikipedia_loader.py     # Wikipedia knowledge loader
 
 │   ├── evaluation/
 
-│   │   ├── baseline_evaluator.py  # Evaluate baselines
+│   │   ├── baseline_evaluator.py
 
-│   │   ├── rag_evaluator.py       # Evaluate RAG outputs
+│   │   ├── rag_evaluator.py
 
-│   │   └── metrics.py             # Compute accuracy, F1
+│   │   └── metrics.py
 
 │   ├── memory/
 
-│   │   └── semantic_cache.py      # Semantic cache (core contribution)
+│   │   └── semantic_cache.py       # Semantic cache (core contribution)
 
 │   └── pipeline/
 
-│       └── multisent_rag.py       # MultiSent-RAG core pipeline
+│       └── multisent_rag.py        # RAG pipeline
 
-├── .gitignore
+├── assets/
+
+│   ├── figure_1.jpg
+
+│   └── figure_2.jpg
 
 ├── requirements.txt
 
@@ -174,41 +104,42 @@ MultiSent-RAG/
 pip install -r requirements.txt
 ```
 
-**Requirements:**
 - Python 3.9+
-- CUDA-compatible GPU recommended. Change `device` to `"cpu"` in scripts if unavailable.
-- For gated models (LLaMA 3): `huggingface-cli login`
+- GPU recommended (change `device` to `"cpu"` if needed)
+- For LLaMA 3 access: `huggingface-cli login`
 
 ---
 
 ## How to Run
 
-### 1. Build Wikipedia knowledge base
+### 1. Build knowledge base
+
 ```bash
 python scripts/build_wikipedia.py
-```
-
-### 2. Build Chroma vector database
-```bash
 python scripts/build_vectorstore.py
 ```
 
-### 3. Run baselines
+### 2. Run baselines
+
 ```bash
 python scripts/run_baselines.py
 ```
-To switch models, edit `model_name` in the script (options are commented in the file).
 
-### 4. Run MultiSent-RAG (all 12 languages)
+Switch models by editing `model_name` in the script (all options commented inside).
+
+### 3. Run MultiSent-RAG
+
 ```bash
 python scripts/run_multisent_rag.py
 ```
 
-### 5. Run MultiSent-RAG with Semantic Cache
+### 4. Run with Semantic Cache
+
 ```bash
 python scripts/run_multisent_rag_cache.py
 ```
-> **Note:** Runs on English by default. Change `TEST_PATH` for other languages (e.g., `test_set_fr.csv`, `test_set_ar.csv`).
+
+> Runs on English by default. Change `TEST_PATH` for other languages (e.g. `test_set_fr.csv`).
 
 ---
 
@@ -229,11 +160,5 @@ python scripts/run_multisent_rag_cache.py
 
 ## Contact
 
-**Khouloud Mnassri**  
-Samovar, Télécom SudParis, Institut Polytechnique de Paris, 91120 Palaiseau, France  
-📧 khouloud.mnassri@telecom-sudparis.eu
-
-
-## License
-
-This repository will be released under an open license upon publication confirmation. Please contact the authors for reuse permissions in the meantime.
+Khouloud Mnassri — khouloud.mnassri@telecom-sudparis.eu  
+Samovar, Télécom SudParis, Institut Polytechnique de Paris
