@@ -138,24 +138,9 @@ python scripts/run_multisent_rag_cache.py
 
 > Runs on English by default. Change `TEST_PATH` for other languages (e.g. `test_set_fr.csv`).
 
----
-
-## Citation
-
-```bibtex
-@article{mnassri2026multisentrag,
-  title     = {MultiSent-RAG: A Retrieval and Memory-Augmented System for Multilingual Sentiment Processing},
-  author    = {Mnassri, Khouloud and Farahbakhsh, Reza and Crespi, Noel},
-  journal   = {Information Processing \& Management},
-  year      = {2026},
-  publisher = {Elsevier},
-  doi       = {10.1016/j.ipm.2026.104990}
-}
-```
 
 ---
 
 ## Contact
 
-Khouloud Mnassri — khouloud.mnassri@telecom-sudparis.eu  
-Samovar, Télécom SudParis, Institut Polytechnique de Paris
+Khouloud Mnassri
