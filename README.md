@@ -137,10 +137,3 @@ python scripts/run_multisent_rag_cache.py
 ```
 
 > Runs on English by default. Change `TEST_PATH` for other languages (e.g. `test_set_fr.csv`).
-
-
----
-
-## Contact
-
-Khouloud Mnassri
