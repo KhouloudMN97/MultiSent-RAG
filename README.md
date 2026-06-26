@@ -2,7 +2,12 @@
 
 Training-free multilingual sentiment analysis using Retrieval-Augmented Generation and semantic cache memory.
 
-**🚀 [Try the live demo](https://huggingface.co/spaces/khouloud/multisent-rag-demo)** — classify sentiment in 12 languages and watch the semantic cache and cross-lingual retrieval work in real time.
+### 🚀 Live Demo
+
+**[▶ Open the interactive demo](https://huggingface.co/spaces/khouloud/multisent-rag-demo)** — classify sentiment in 12 languages and watch the semantic cache and cross-lingual retrieval work in real time.
+
+[![MultiSent-RAG live demo](assets/demo_screenshot.png)](https://huggingface.co/spaces/khouloud/multisent-rag-demo)
+
 
 ---
 
